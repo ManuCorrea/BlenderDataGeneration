@@ -18,16 +18,22 @@ addon_utils.enable("io_import_images_as_planes")
 """
 TODO:
 * define 3 lines stages
-* move images
+* move images once imported for saving reading disk
 * make them look to camera
 * position them in line
 * scaled images
 * add classes to the YOLO file
 
 * Scale humans a bit bigger
+    * Scale them around 1.2
+* Add +- scaling setting
+* Find dimensions or way to make image "stand" on the floor
+    * Location of images is the middle point of it. So knowing the dimension/2 and make that move from the floor up
 * Add background random way
 * Lines testing and stuff
 * Add some 3D object
+* Move lights around the scene
+* Refactor code
 
 FIXME
 * Images that are added with sufix
@@ -99,16 +105,6 @@ def export_render(scene, res_x, res_y, res_per, samples, file_path, file_name):
     bpy.ops.render.render(write_still=True)
 
 
-# file = os.path.abspath('/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/dataset/cart/0.png')
-
-# print(f"Correcto files {os.path.basename(file)} dirname {os.path.dirname(file)}")
-
-
-# bpy.ops.import_image.to_plane(shader='SHADELESS',
-#     files=[{'name': os.path.basename(file)}],
-#     directory=os.path.dirname(file))
-
-
 def add_images_planes(objects_list, path):
     added = []
     for object_to_add in objects_list:
@@ -125,19 +121,34 @@ def add_images_planes(objects_list, path):
     return added
 
 
-# def add_floor(size=50):
-#     # This adds a plane
-#     bpy.ops.mesh.primitive_plane_add(
-#         size=size, enter_editmode=False, align='WORLD', location=(1, 0, 0), scale=(1, 1, 1))
+def add_simple_floor(size=50, location=(0, 0, -0.5), rgba=(0, 0, 0, 1)):
+    print("Adding floor")
+    # This adds a plane
+    bpy.ops.mesh.primitive_plane_add(
+        size=size, enter_editmode=False, align='WORLD', location=location, scale=(1, 1, 1))
+
+    # material = bpy.data.materials["Material"].node_tree.nodes["Principled BSDF"].inputs[0].default_value = (
+    #     0.8, 0.269606, 0, 1)
+
+    # https://blender.stackexchange.com/questions/56751/add-material-and-apply-diffuse-color-via-python
+    mat = bpy.data.materials.new(name="MaterialName")
+    bpy.data.objects['Plane'].data.materials.append(
+        mat)  # add the material to the object
+    bpy.context.object.active_material.diffuse_color = rgba  # change color
+
+
+def delete_existing_floor():
+    bpy.data.objects["Plane"].select_set(True)
+    bpy.ops.object.delete()
 
 
 # def add_background(object_to_add, path):
 #     name = os.path.basename(object_to_add)
 
-
 #     bpy.ops.import_image.to_plane(files=[{"name": name}], directory=path,
-#                               align_axis='CAM', prev_align_axis='CAM_AX',
-#                               size_mode='CAMERA', fill_mode='FILL', shader='SHADELESS')
+#                                   align_axis='CAM', prev_align_axis='CAM_AX',
+#                                   size_mode='CAMERA', fill_mode='FILL', shader='SHADELESS')
+
 
 # def delete_existing_background():
 #     pass
@@ -284,6 +295,8 @@ print(f"Human path: {human_images}")
 print("################################")
 
 for i in range(EPOCHS):
+    add_simple_floor(rgba=(random.random(), random.random(),
+                           random.random(), 1))
     sampled_carts = get_list_random_images(cart_images)
     sampled_humans = get_list_random_images(human_images)
 
@@ -310,7 +323,8 @@ for i in range(EPOCHS):
     # Display demo information - Label construction
     print("---> Label Construction")
     text_coordinates = get_all_coordinates(added_carts_names, classes["cart"])
-    text_coordinates_humans = get_all_coordinates(added_humans_names, classes["human"])
+    text_coordinates_humans = get_all_coordinates(
+        added_humans_names, classes["human"])
 
     text_coordinates = text_coordinates + text_coordinates_humans
 
@@ -328,6 +342,7 @@ for i in range(EPOCHS):
 
     delete_images_planes(added_carts_names)
     delete_images_planes(added_humans_names)
+    delete_existing_floor()
 
 """
 For delecting objects you select the object and then call bpy.ops.object.delete()
