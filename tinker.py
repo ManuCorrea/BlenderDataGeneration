@@ -5,8 +5,6 @@ import random
 import time
 import os
 import mathutils
-
-
 import addon_utils
 
 addon_utils.enable("io_import_images_as_planes")
@@ -39,7 +37,7 @@ FIXME
 * Images that are added with sufix
 * Non deleted objects -> sol: delete keys that contains object
 """
-EPOCHS = 5
+EPOCHS = 100
 dataset_path = "/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/dataset/"
 cart_path = dataset_path + "cart"
 human_path = dataset_path + "human"
@@ -153,12 +151,22 @@ def delete_existing_floor():
 # def delete_existing_background():
 #     pass
 
-
+# This may be improved
 def delete_images_planes(names_list):
+    repeated = False
+    
+    if len(names_list) != len(set(names_list)):
+        repeated = True
     for name in names_list:
-        print(f"Deleting {name}")
+        print(f"Selecting {name} in {bpy.data.objects.keys()}")
         if name in bpy.data.objects.keys():
             bpy.data.objects[name].select_set(True)
+        if repeated:
+            for key in bpy.data.objects.keys():
+                if key.startswith(name):
+                    bpy.data.objects[key].select_set(True)
+            print(
+                f"\n\n\n!!!!Pues eso repetido {name} hay {names_list.count(name)}\n\n\n")
     bpy.ops.object.delete()
 
 
@@ -170,19 +178,19 @@ def get_all_coordinates(objects, class_type):
     main_text_coordinates = ''  # Initialize the variable where we'll store the coordinates
     # Loop through all of the objects
     for i, objct in enumerate(objects):
-        print("     On object:", objct)
+        # print("     On object:", objct)
         # Get current object's coordinates
         b_box = find_img_bounding_box(bpy.data.objects[objct])
         if b_box:  # If find_bounding_box() doesn't return None
-            print("         Initial coordinates:", b_box)
+            # print("         Initial coordinates:", b_box)
             text_coordinates = format_coordinates(
                 b_box, class_type)  # Reformat coordinates to YOLOv3 format
-            print("         YOLO-friendly coordinates:", text_coordinates)
+            # print("         YOLO-friendly coordinates:", text_coordinates)
             # Update main_text_coordinates variables whith each
             main_text_coordinates = main_text_coordinates + text_coordinates
             # line corresponding to each class in the frame of the current image
         else:
-            print("         Object not visible")
+            # print("         Object not visible")
             pass
     return main_text_coordinates
 
@@ -244,8 +252,6 @@ def find_img_bounding_box(obj):
             continue
         else:
             """ Perspective division """
-            # TODO understand this part
-            # So we are first dividing
             frame = [(v / (v.z / z)) for v in frame]
 
         # take the points of the frame
@@ -300,15 +306,15 @@ for i in range(EPOCHS):
     sampled_carts = get_list_random_images(cart_images)
     sampled_humans = get_list_random_images(human_images)
 
-    print("!!!!!!!!!!!!!!!!!SAMPLED!!!!!!!!!!!!!!!!!")
-    print(sampled_carts)
-    print(sampled_humans)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    # print("!!!!!!!!!!!!!!!!!SAMPLED!!!!!!!!!!!!!!!!!")
+    # print(sampled_carts)
+    # print(sampled_humans)
+    # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     added_carts_names = add_images_planes(sampled_carts, cart_path)
     added_humans_names = add_images_planes(sampled_humans, human_path)
 
-    render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources'
+    render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/generated'
     export_render(scene, 500, 500, 100, 30, render_img_saving_path, f'{i}.png')
 
     # Here we add the bbox
@@ -328,37 +334,26 @@ for i in range(EPOCHS):
 
     text_coordinates = text_coordinates + text_coordinates_humans
 
-    print("text_coordinates: " + text_coordinates)
     splitted_coordinates = text_coordinates.split(
         '\n')[:-1]  # Delete last '\n' in coordinates
     # Write the coordinates to the text file and output the render_counter.txt file
     text_file.write('\n'.join(splitted_coordinates))
     text_file.close()  # Close the .txt file corresponding to the label
 
-    print("!!!!!!!!!!!!!!!!!ADDED!!!!!!!!!!!!!!!!!")
-    print(added_carts_names)
-    print(added_humans_names)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    # print("!!!!!!!!!!!!!!!!!ADDED!!!!!!!!!!!!!!!!!")
+    # print(added_carts_names)
+    # print(added_humans_names)
+    # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     delete_images_planes(added_carts_names)
     delete_images_planes(added_humans_names)
     delete_existing_floor()
 
 """
-For delecting objects you select the object and then call bpy.ops.object.delete()
-Ej:
-bpy.data.objects['1.001'].select_set(True)
-bpy.ops.object.delete()
-
 To get size of an image
 bpy.data.images['1.png'].size
-
-Data for camera
-Location 3 0 0
-Rotation 90 0 90
 
 Data for images
 Location X (to camera) Y (sides) Z 0+-?
 Rotation 90 0 180
-
 """
