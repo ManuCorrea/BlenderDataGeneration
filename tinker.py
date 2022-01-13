@@ -1,3 +1,4 @@
+from numpy.core import numeric
 import bpy
 import numpy as np
 import math as m
@@ -33,11 +34,17 @@ TODO:
 * Move lights around the scene
 * Refactor code
 
+TODO design:
+* Make general structure to define paths, type of objects/class, properties(eg: scaling), number of objects, +-positions...
+
 FIXME
 * Images that are added with sufix
 * Non deleted objects -> sol: delete keys that contains object
+* When floor is added and no objects are managed in delete_images_planes([]) (with empty list)
+  the floor is deleted on delete_images_planes (since the plane must be selected and gets
+  deleted by bpy.ops.object.delete())
 """
-EPOCHS = 100
+EPOCHS = 10
 dataset_path = "/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/dataset/"
 cart_path = dataset_path + "cart"
 human_path = dataset_path + "human"
@@ -117,6 +124,73 @@ def add_images_planes(objects_list, path):
         added.append(name)
         bpy.data.objects[name].location = mathutils.Vector(get_random_xyz())
     return added
+
+
+
+class RenderPreloadingAssets:
+    def __init__(self, object_list, path):
+        self.objects = add_all_images_unrendered(object_list, path)
+
+    def move_selected_objects(self):
+        for name in self.selected_objects:
+            bpy.data.objects[name].location = mathutils.Vector(get_random_xyz())
+
+    def hide_render_of_objects(self, object_list, render_object):
+        for obj in object_list:
+            bpy.data.objects[obj].hide_render = render_object
+
+
+    def delete_all_images(self):
+        for name in self.objects:
+            if name in bpy.data.objects.keys():
+                bpy.data.objects[name].select_set(True)
+        bpy.ops.object.delete()
+
+    def generate_scene(self, idx):
+        add_simple_floor(rgba=(random.random(), random.random(),
+                               random.random(), 1))
+        # over the existing objects pick some
+        self.selected_objects = get_list_random_images(self.objects)
+        # make them render
+        self.hide_render_of_objects(self.selected_objects, False)
+        # move them
+        self.move_selected_objects()
+        # TODO handle camera
+        # render
+        render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/generated'
+        export_render(scene, 500, 500, 100, 30, render_img_saving_path, f'{idx}.png')
+
+        # Here we add the bbox
+        labels_filepath = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/labels'
+        # Output Labels
+        text_file_name = labels_filepath + '/' + \
+            str(idx) + \
+            '.txt'  # Create label file name
+        # Open .txt file of the label
+        text_file = open(text_file_name, 'w+')
+        # Get formatted coordinates of the bounding boxes of all the objects in the scene
+        # Display demo information - Label construction
+
+        text_coordinates = get_all_coordinates(self.selected_objects, classes["cart"])
+
+        splitted_coordinates = text_coordinates.split(
+            '\n')[:-1]  # Delete last '\n' in coordinates
+        # Write the coordinates to the text file and output the render_counter.txt file
+        text_file.write('\n'.join(splitted_coordinates))
+        text_file.close()  # Close the .txt file corresponding to the label
+
+        # make the picked unrender
+        self.hide_render_of_objects(self.selected_objects, True)
+
+        # world config
+        delete_existing_floor()
+
+
+def add_all_images_unrendered(objects_list, path):
+    objects_list = add_images_planes(objects_list, path)
+    for obj in objects_list:
+        bpy.data.objects[obj].hide_render = True
+    return objects_list
 
 
 def add_simple_floor(size=50, location=(0, 0, -0.5), rgba=(0, 0, 0, 1)):
@@ -300,19 +374,79 @@ print(f"Cart path: {cart_path}")
 print(f"Human path: {human_images}")
 print("################################")
 
-for i in range(EPOCHS):
+# import sys
+# sampled_carts = get_list_random_images(cart_images)
+# add_all_images_unrendered(cart_images, cart_path)
+
+# for i in range(EPOCHS):
+#     add_simple_floor(rgba=(random.random(), random.random(),
+#                            random.random(), 1))
+#     sampled_carts = get_list_random_images(cart_images)
+#     sampled_humans = get_list_random_images(human_images)
+
+#     # print("!!!!!!!!!!!!!!!!!SAMPLED!!!!!!!!!!!!!!!!!")
+#     # print(sampled_carts)
+#     # print(sampled_humans)
+#     # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+#     added_carts_names = add_images_planes(sampled_carts, cart_path)
+#     added_humans_names = add_images_planes(sampled_humans, human_path)
+
+#     render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/generated'
+#     export_render(scene, 500, 500, 100, 30, render_img_saving_path, f'{i}.png')
+
+#     # Here we add the bbox
+#     labels_filepath = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/labels'
+#     # Output Labels
+#     text_file_name = labels_filepath + '/' + \
+#         str(i) + \
+#         '.txt'  # Create label file name
+#     # Open .txt file of the label
+#     text_file = open(text_file_name, 'w+')
+#     # Get formatted coordinates of the bounding boxes of all the objects in the scene
+#     # Display demo information - Label construction
+#     print("---> Label Construction")
+#     text_coordinates = get_all_coordinates(added_carts_names, classes["cart"])
+#     text_coordinates_humans = get_all_coordinates(
+#         added_humans_names, classes["human"])
+
+#     text_coordinates = text_coordinates + text_coordinates_humans
+
+#     splitted_coordinates = text_coordinates.split(
+#         '\n')[:-1]  # Delete last '\n' in coordinates
+#     # Write the coordinates to the text file and output the render_counter.txt file
+#     text_file.write('\n'.join(splitted_coordinates))
+#     text_file.close()  # Close the .txt file corresponding to the label
+
+#     # print("!!!!!!!!!!!!!!!!!ADDED!!!!!!!!!!!!!!!!!")
+#     # print(added_carts_names)
+#     # print(added_humans_names)
+#     # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+#     delete_images_planes(added_carts_names)
+#     delete_images_planes(added_humans_names)
+#     delete_existing_floor()
+
+
+from timeit import Timer
+
+render = RenderPreloadingAssets(cart_images, cart_path)
+
+t = Timer(lambda: render.generate_scene(1))
+print(t.timeit(number=20))  # 22.929327520003426
+# # for i in range(EPOCHS):
+    
+    
+# render.delete_all_images()
+
+
+def generate_scene(i):
     add_simple_floor(rgba=(random.random(), random.random(),
                            random.random(), 1))
+
+    print(f" --------- {bpy.data.objects.keys()}")
     sampled_carts = get_list_random_images(cart_images)
-    sampled_humans = get_list_random_images(human_images)
-
-    # print("!!!!!!!!!!!!!!!!!SAMPLED!!!!!!!!!!!!!!!!!")
-    # print(sampled_carts)
-    # print(sampled_humans)
-    # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
     added_carts_names = add_images_planes(sampled_carts, cart_path)
-    added_humans_names = add_images_planes(sampled_humans, human_path)
 
     render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/generated'
     export_render(scene, 500, 500, 100, 30, render_img_saving_path, f'{i}.png')
@@ -327,12 +461,8 @@ for i in range(EPOCHS):
     text_file = open(text_file_name, 'w+')
     # Get formatted coordinates of the bounding boxes of all the objects in the scene
     # Display demo information - Label construction
-    print("---> Label Construction")
-    text_coordinates = get_all_coordinates(added_carts_names, classes["cart"])
-    text_coordinates_humans = get_all_coordinates(
-        added_humans_names, classes["human"])
 
-    text_coordinates = text_coordinates + text_coordinates_humans
+    text_coordinates = get_all_coordinates(added_carts_names, classes["cart"])
 
     splitted_coordinates = text_coordinates.split(
         '\n')[:-1]  # Delete last '\n' in coordinates
@@ -340,14 +470,17 @@ for i in range(EPOCHS):
     text_file.write('\n'.join(splitted_coordinates))
     text_file.close()  # Close the .txt file corresponding to the label
 
-    # print("!!!!!!!!!!!!!!!!!ADDED!!!!!!!!!!!!!!!!!")
-    # print(added_carts_names)
-    # print(added_humans_names)
-    # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
+    print(f"Before delete_image_planes --------- {bpy.data.objects.keys()}")
+    print(added_carts_names)
     delete_images_planes(added_carts_names)
-    delete_images_planes(added_humans_names)
+    print(f"Before calling --------- {bpy.data.objects.keys()}")
     delete_existing_floor()
+    print(f" --------- {bpy.data.objects.keys()}")
+
+
+# t = Timer(lambda: generate_scene(1))
+# print(t.timeit(number=20)) # 22.532155615001102
 
 """
 To get size of an image
