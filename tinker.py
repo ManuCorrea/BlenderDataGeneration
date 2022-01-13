@@ -14,36 +14,9 @@ addon_utils.enable("io_import_images_as_planes")
 # https://blender.stackexchange.com/questions/121980/how-to-load-import-a-png-image-as-plane-via-blenders-python-api
 # bpy.ops.wm.addon_enable(module='io_import_images_as_planes')
 
-"""
-TODO:
-* define 3 lines stages
-* move images once imported for saving reading disk
-* make them look to camera
-* position them in line
-* scaled images
-* add classes to the YOLO file
-
-* Scale humans a bit bigger
-    * Scale them around 1.2
-* Add +- scaling setting
-* Find dimensions or way to make image "stand" on the floor
-    * Location of images is the middle point of it. So knowing the dimension/2 and make that move from the floor up
-* Add background random way
-* Lines testing and stuff
-* Add some 3D object
-* Move lights around the scene
-* Refactor code
-
-TODO design:
-* Make general structure to define paths, type of objects/class, properties(eg: scaling), number of objects, +-positions...
-
-FIXME
-* Images that are added with sufix
-* Non deleted objects -> sol: delete keys that contains object
-* When floor is added and no objects are managed in delete_images_planes([]) (with empty list)
-  the floor is deleted on delete_images_planes (since the plane must be selected and gets
-  deleted by bpy.ops.object.delete())
-"""
+# FIXME When floor is added and no objects are managed in delete_images_planes([])
+# (with empty list)the floor is deleted on delete_images_planes(since the plane must
+# be selected and gets deleted by bpy.ops.object.delete())
 EPOCHS = 10
 dataset_path = "/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/dataset/"
 cart_path = dataset_path + "cart"
