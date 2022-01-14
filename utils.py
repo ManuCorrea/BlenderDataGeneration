@@ -20,6 +20,11 @@ def get_files_from_path(path):
     return filenames
 
 
+def get_directories_from_path(path):
+    (_, directories, _) = next(os.walk(path))
+    return directories
+
+
 def get_random_xyz(x_range=(-2, 2), y_range=(0, 2), z_range=(0, 0)):
     x = random.uniform(x_range[0], x_range[1])
     y = random.uniform(y_range[0], y_range[1])
