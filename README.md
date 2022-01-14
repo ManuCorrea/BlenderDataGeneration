@@ -2,7 +2,7 @@
 
 ## Roadmap
 ### TODO:
-* define 3 lines stages
+* Define class for handeling data reading/folder/classes
 * Option to make images look at the camera
 * Option/params to scale images/+- scaling randomly
 * Parameter/option file to define classes (for YOLO labeling)
