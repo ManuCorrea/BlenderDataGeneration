@@ -152,7 +152,37 @@ class DataHandler:
                     pass
         return main_text_coordinates
 
-# TODO: Class for floor
+class Floor:
+    def __init__(self, size=50, location=(0, 0, 0), rgba=(0, 0, 0, 1), random=False):
+        self.size = size
+        self.location = location
+        self.rgba = rgba
+        self.random = random
+
+    def add_simple_floor(self):
+        set_before_adding = set(bpy.data.objects.keys())
+        # This adds a plane
+        bpy.ops.mesh.primitive_plane_add(
+            size=self.size, enter_editmode=False, align='WORLD', location=self.location, scale=(1, 1, 1))
+
+        set_after_adding = set(bpy.data.objects.keys())
+        self.plane_name = set_after_adding.difference(set_before_adding).pop()
+
+        # material = bpy.data.materials["Material"].node_tree.nodes["Principled BSDF"].inputs[0].default_value = (
+        #     0.8, 0.269606, 0, 1)
+
+        # https://blender.stackexchange.com/questions/56751/add-material-and-apply-diffuse-color-via-python
+        mat = bpy.data.materials.new(name="MaterialName")
+        bpy.data.objects[self.plane_name].data.materials.append(
+            mat)  # add the material to the object
+        if self.random:
+            bpy.context.object.active_material.diffuse_color = (random.random(), random.random(), random.random(), 1)
+        else:
+            bpy.context.object.active_material.diffuse_color = self.rgba
+
+    def delete_existing_floor(self):
+        bpy.data.objects[self.plane_name].select_set(True)
+        bpy.ops.object.delete()
 
 # TODO: Class for background
 
