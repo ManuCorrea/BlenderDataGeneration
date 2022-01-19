@@ -51,3 +51,6 @@ data.sample()
 print(f"\ndata.active_objects -> {data.active_objects}")
 print("----------------")
 
+print(f"\ndata.classes -> {data.classes}")
+print("----------------")
+

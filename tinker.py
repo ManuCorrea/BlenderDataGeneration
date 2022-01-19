@@ -31,7 +31,7 @@ addon_utils.enable("io_import_images_as_planes")
 # https://blender.stackexchange.com/questions/121980/how-to-load-import-a-png-image-as-plane-via-blenders-python-api
 # bpy.ops.wm.addon_enable(module='io_import_images_as_planes')
 
-EPOCHS = 10
+EPOCHS = 5
 dataset_path = "/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/dataset/"
 cart_path = dataset_path + "cart"
 human_path = dataset_path + "human"
@@ -48,34 +48,39 @@ camera.location = (0, 6, 0)
 camera.rotation_euler = (m.radians(90), 0, m.radians(180))
 
 
-cart_images = get_files_from_path(cart_path)
-print(cart_images)
-human_images = get_files_from_path(human_path)
-
-labels_filepath = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/labels'
+# cart_images = get_files_from_path(cart_path)
+# human_images = get_files_from_path(human_path)
+# labels_filepath = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/labels'
 render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/generated'
-
-print("################################")
-print(f"Cart path: {cart_path}")
-print(f"Human path: {human_images}")
-print("################################")
+# print("################################")
+# print(f"Cart path: {cart_path}")
+# print(f"Human path: {human_images}")
+# print("################################")
 
 from timeit import Timer
 
-# render = RenderPreloadingAssets(
-#     cart_images, cart_path, render_img_saving_path, classes)
+# wanted_objects = ["cart", "human"]
+wanted_objects = ["cart_simple"]
 
-# t = Timer(lambda: render.generate_scene(1))
-# # print(t.timeit(number=20))  # 22.929327520003426
-# print(t.timeit(number=5))
-# # for i in range(EPOCHS):
+# render = generation.RenderPreloadingAssets(
+#     dataset_path, render_img_saving_path, wanted_objects=wanted_objects)
+
+# # t = Timer(lambda: render.generate_scene(1))
+# # # print(t.timeit(number=20))  # 22.929327520003426
+# # print(t.timeit(number=5))
+# for i in range(EPOCHS):
+#     render.generate_scene(i)
        
 # render.delete_all_images()
 
-render = Render(cart_images, cart_path, render_img_saving_path, classes)
+#######################
+
+render = Render(dataset_path, render_img_saving_path, wanted_objects=wanted_objects)
 t = Timer(lambda: render.generate_scene(1))
 # print(t.timeit(number=20)) # 22.532155615001102
-print(t.timeit(number=5))
+# print(t.timeit(number=5))
+for i in range(EPOCHS):
+    render.generate_scene(i)
 
 """
 To get size of an image
