@@ -6,12 +6,16 @@ import sys
 import numpy as np
 
 # TODO add option to choose exact number
-def get_list_random_images(imgs_list, n_max_objects=5):
-    i = random.randrange(n_max_objects + 1)
+def get_list_random_images(imgs_list, n_max_objects=5, n_exact_number=None):
     objects = list()
-    while i > 0:
-        objects.append(random.choice(imgs_list))
-        i -= 1
+    if n_exact_number is None:
+        i = random.randrange(n_max_objects + 1)
+        while i > 0:
+            objects.append(random.choice(imgs_list))
+            i -= 1
+    else:
+        for i in range(n_exact_number):
+            objects.append(random.choice(imgs_list))
     return objects
 
 

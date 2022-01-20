@@ -44,12 +44,12 @@ camera = bpy.data.objects['Camera']
 axis = bpy.data.objects['Main Axis']
 axis.rotation_euler = (0, 0, 0)
 axis.location = (0, 0, 0)
-camera.location = (0, 6, 0)
+camera.location = (0, 6, 0.3)
 camera.rotation_euler = (m.radians(90), 0, m.radians(180))
 
 render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/generated'
 
-floor = generation.Floor(random=True, size=30, location=(0, 0, -0.5))
+floor = generation.Floor(random=True, size=30, location=(0, 0, 0))
 
 # from timeit import Timer
 
@@ -69,14 +69,23 @@ wanted_objects = ["cart", "human"]
 
 #######################
 
+background = generation.Background(dataset_path, wanted_classes=["bg"], 
+                                    location=(0,0,0.5), rotation=(m.radians(90), 0, m.radians(180)),
+                                    scale=5)
+# background.add_img_background()
+# floor.add_simple_floor()
+# background.remove_img_background()
+
 render = Render(dataset_path, render_img_saving_path, wanted_objects=wanted_objects)
-# t = Timer(lambda: render.generate_scene(1))
-# print(t.timeit(number=20)) # 22.532155615001102
-# print(t.timeit(number=5))
+# # t = Timer(lambda: render.generate_scene(1))
+# # print(t.timeit(number=20)) # 22.532155615001102
+# # print(t.timeit(number=5))
 for i in range(EPOCHS):
     floor.add_simple_floor()
+    background.add_img_background()
     render.generate_scene(i)
-    # floor.delete_existing_floor()
+    floor.delete_existing_floor()
+    background.remove_img_background()
 
 """
 To get size of an image

@@ -3,9 +3,12 @@ import bpy
 import mathutils
 from utils import *
 
+# TODO get position+- as per class parameter
+# TODO get scaling+- as per class parameter
+
 
 class DataHandler:
-    def __init__(self, path_of_classes_folders=None, wanted_classes=None):
+    def __init__(self, path_of_classes_folders=None, wanted_classes=None, classes_txt=True):
 
         self.classes = {}
         self.objects_paths = {}  # Dict keys:class_name = path
@@ -38,14 +41,16 @@ class DataHandler:
                 self.objects_paths[class_])
 
         # get self.classes
-        classes_location = os.path.join(path_of_classes_folders, "classes.txt")
-        classes_txt_exist = os.path.isfile(classes_location)
-        print(
-            f"\nChecking if {classes_location} exist -> {classes_txt_exist}\n")
-        if classes_txt_exist:
-            self.read_classes_file(classes_location)
-        else:
-            self.generate_classes_file(classes_location)
+        if classes_txt:
+            classes_location = os.path.join(
+                path_of_classes_folders, "classes.txt")
+            classes_txt_exist = os.path.isfile(classes_location)
+            print(
+                f"\nChecking if {classes_location} exist -> {classes_txt_exist}\n")
+            if classes_txt_exist:
+                self.read_classes_file(classes_location)
+            else:
+                self.generate_classes_file(classes_location)
 
     # TODO n_max_objects_per_class make it parametrizable from __init__
     def sample(self, n_max_objects_per_class=5):
@@ -78,7 +83,10 @@ class DataHandler:
             self.objects_paths[class_] = object_path
             print(f"iter {class_} y su obj path = {object_path}")
 
-    def add_images_planes(self):
+    # FIXME make location as general parameter, not as function arg
+    # FIXME make rotation as general parameter, not as function arg
+    # change made for temporal background class
+    def add_images_planes(self, location=None, rotation=None, scale=None):
         for obj in self.active_objects.keys():
             objects_list = self.active_objects[obj]
             path = self.objects_paths[obj]
@@ -88,8 +96,17 @@ class DataHandler:
                                               files=[{'name': name}],
                                               directory=path)
                 name = os.path.splitext(name)[0]
-                bpy.data.objects[name].location = mathutils.Vector(
-                    get_random_xyz())
+                if location is None:
+                    bpy.data.objects[name].location = mathutils.Vector(
+                        get_random_xyz())
+                else:
+                    bpy.data.objects[name].location = mathutils.Vector(
+                        location)
+                if location is not None:
+                    bpy.data.objects[name].rotation_euler = mathutils.Vector(
+                        rotation)
+                if scale is not None:
+                    bpy.data.objects[name].scale *= scale
 
     def delete_images_planes(self):
         for obj in self.active_objects.keys():
@@ -185,7 +202,36 @@ class Floor:
         bpy.data.objects[self.plane_name].select_set(True)
         bpy.ops.object.delete()
 
-# TODO: Class for background
+
+class Background:
+    def __init__(self, path_of_classes_folders=None, wanted_classes=None, size=50, location=(0, 0, 0), rotation=(0, 0, 0), scale=1, rgba=(0, 0, 0, 1), random=False):
+        self.size = size
+        self.location = location
+        self.rotation = rotation
+        self.scale = scale
+        # TODO make also simple_background, maybe make parent class for Floor and Background classes
+        self.rgba = rgba
+        self.random = random
+        self.data_handler = DataHandler(
+            path_of_classes_folders, wanted_classes, classes_txt=False)
+
+    def sample(self):
+        self.data_handler.active_objects = {}
+        for obj in self.data_handler.objects.keys():
+            self.data_handler.active_objects[obj] = get_list_random_images(
+                self.data_handler.objects[obj], n_exact_number=1)
+        return self.data_handler.active_objects
+
+    def add_img_background(self):
+        # self.data_handler.sample(1)
+        self.sample()
+        print(
+            f"Active objects en background: {self.data_handler.active_objects}")
+        self.data_handler.add_images_planes(
+            location=self.location, rotation=self.rotation, scale=self.scale)
+
+    def remove_img_background(self):
+        self.data_handler.delete_images_planes()
 
 
 class Render:
