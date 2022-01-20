@@ -2,19 +2,20 @@
 
 ## Roadmap
 ### TODO:
-* Define class for handeling data reading/folder/classes
 * Option to make images look at the camera
 * Option/params to scale images/+- scaling randomly
-* Parameter/option file to define classes (for YOLO labeling)
-* Make images "stand" on the floor
+* Make images "stand" on the floor as a parameter
 * Add background simple
-* Add background from assets
-* Add 3D objects
+* Add 3D objects and handle them with DataHandler
+* Light class
 * Lights randomization, movement, etc
+* Camera class
+* Lights randomization, movement, etc
+* Scene rendering class
 * Refactor code
 
 ### TODO design:
-* Make general structure to define paths, type of objects/class, properties(eg: scaling), number of objects, +-positions...
+* Make general structure to define properties(eg: scaling, position, transformations, etc), number of objects
 
 ### FIX:
 
