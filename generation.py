@@ -47,11 +47,12 @@ class DataHandler:
         else:
             self.generate_classes_file(classes_location)
 
-    def sample(self):
+    # TODO n_max_objects_per_class make it parametrizable from __init__
+    def sample(self, n_max_objects_per_class=5):
         self.active_objects = {}
         for obj in self.objects.keys():
             self.active_objects[obj] = get_list_random_images(
-                self.objects[obj])
+                self.objects[obj], n_max_objects=n_max_objects_per_class)
         return self.active_objects
 
     def read_classes_file(self, path):
@@ -108,7 +109,6 @@ class DataHandler:
                         if key.startswith(name):
                             bpy.data.objects[key].select_set(True)
         bpy.ops.object.delete()
-    
 
     def add_all_images_unrendered(self):
         for obj in self.objects.keys():
@@ -123,14 +123,13 @@ class DataHandler:
                 bpy.data.objects[name].location = mathutils.Vector(
                     get_random_xyz())
 
-
     def get_all_coordinates(self, scene):
         '''
         This function takes no input and outputs the complete string with the coordinates
         of all the objects in view in the current image
         '''
         main_text_coordinates = ''  # Initialize the variable where we'll store the coordinates
-        
+
         for obj in self.active_objects.keys():
             objects_list = self.active_objects[obj]
             # Loop through all of the objects
@@ -152,6 +151,7 @@ class DataHandler:
                     pass
         return main_text_coordinates
 
+
 class Floor:
     def __init__(self, size=50, location=(0, 0, 0), rgba=(0, 0, 0, 1), random=False):
         self.size = size
@@ -166,8 +166,8 @@ class Floor:
             size=self.size, enter_editmode=False, align='WORLD', location=self.location, scale=(1, 1, 1))
 
         set_after_adding = set(bpy.data.objects.keys())
+        # Finding the name of the added plane
         self.plane_name = set_after_adding.difference(set_before_adding).pop()
-
         # material = bpy.data.materials["Material"].node_tree.nodes["Principled BSDF"].inputs[0].default_value = (
         #     0.8, 0.269606, 0, 1)
 
@@ -176,7 +176,8 @@ class Floor:
         bpy.data.objects[self.plane_name].data.materials.append(
             mat)  # add the material to the object
         if self.random:
-            bpy.context.object.active_material.diffuse_color = (random.random(), random.random(), random.random(), 1)
+            bpy.context.object.active_material.diffuse_color = (
+                random.random(), random.random(), random.random(), 1)
         else:
             bpy.context.object.active_material.diffuse_color = self.rgba
 
@@ -195,16 +196,7 @@ class Render:
         self.data_handler = DataHandler(data_path, wanted_objects)
 
     def generate_scene(self, idx):
-        add_simple_floor(
-            rgba=(random.random(), random.random(), random.random(), 1))
-
         self.data_handler.sample()
-        # sampled_objects = get_list_random_images(self.objects)
-
-        # TODO add_images_planes change for DataHandler
-        # added_carts_names = add_images_planes(
-        #     self.data_handler.active_objects, self.path)
-        # print(f"\n\n\nadded_carts_names------ {added_carts_names}\n\n\n")
         self.data_handler.add_images_planes()
 
         export_render(self.scene, 500, 500, 100, 30,
@@ -217,11 +209,7 @@ class Render:
         # Open .txt file of the label
         text_file = open(text_file_name, 'w+')
         # Get formatted coordinates of the bounding boxes of all the objects in the scene
-        # Display demo information - Label construction
-
-        # TODO handle classes in non-hardcored way
         text_coordinates = self.data_handler.get_all_coordinates(self.scene)
-
         splitted_coordinates = text_coordinates.split(
             '\n')[:-1]  # Delete last '\n' in coordinates
         # Write the coordinates to the text file and output the render_counter.txt file
@@ -229,18 +217,12 @@ class Render:
         text_file.close()  # Close the .txt file corresponding to the label
 
         # print(f"Before delete_image_planes --------- {bpy.data.objects.keys()}")
-        # print(added_carts_names)
-        # delete_images_planes(added_carts_names)
         self.data_handler.delete_images_planes()
-        # print(f"Before calling --------- {bpy.data.objects.keys()}")
-        delete_existing_floor()
-        # print(f" --------- {bpy.data.objects.keys()}")
 
 
 class RenderPreloadingAssets:
     def __init__(self, data_path, output_path, wanted_objects=None):
         self.data_handler = DataHandler(data_path, wanted_objects)
-        
         self.data_handler.add_all_images_unrendered()
         self.scene = bpy.data.scenes['Scene']
         self.render_img_saving_path = output_path
@@ -254,10 +236,10 @@ class RenderPreloadingAssets:
                 bpy.data.objects[name].location = mathutils.Vector(
                     get_random_xyz())
 
-    # TODO handle this function
     def hide_render_of_objects(self, render_object):
         for class_ in self.data_handler.active_objects.keys():
-            object_list = self.data_handler.active_objects[class_] # Active objects
+            # Active objects
+            object_list = self.data_handler.active_objects[class_]
             for obj in object_list:
                 name = obj.split('.')[0]
                 bpy.data.objects[name].hide_render = render_object
@@ -272,17 +254,7 @@ class RenderPreloadingAssets:
         bpy.ops.object.delete()
 
     def generate_scene(self, idx):
-        add_simple_floor(rgba=(random.random(), random.random(),
-                               random.random(), 1))
-        # over the existing objects pick some
-        # it will use sample() and will be a dict instead of a list
-
         self.data_handler.sample()
-
-        # self.selected_objects = get_list_random_images(self.objects)
-
-        # make them render
-        # self.hide_render_of_objects(self.selected_objects, False)
         self.hide_render_of_objects(False)
         # move them
         self.move_selected_objects()
@@ -299,8 +271,6 @@ class RenderPreloadingAssets:
         text_file = open(text_file_name, 'w+')
         # Get formatted coordinates of the bounding boxes of all the objects in the scene
         # Display demo information - Label construction
-
-        # TODO handle classes in non-hardcored way
         text_coordinates = self.data_handler.get_all_coordinates(self.scene)
 
         splitted_coordinates = text_coordinates.split(
@@ -311,6 +281,3 @@ class RenderPreloadingAssets:
 
         # make the picked unrender
         self.hide_render_of_objects(True)
-
-        # world config
-        delete_existing_floor()
