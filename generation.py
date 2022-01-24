@@ -1,10 +1,36 @@
 import random
+from typing import NamedTuple
 import bpy
 import mathutils
 from utils import *
 
 # TODO get position+- as per class parameter
 # TODO get scaling+- as per class parameter
+
+
+# class Position(NamedTuple):
+#     x: int
+#     y: int
+#     z: int
+
+
+# class PositionRange(NamedTuple):
+#     x: tuple(int, int)
+#     y: tuple(int, int)
+#     z: tuple(int, int)
+
+
+# class Parameters:
+#     def __init__(self, position=(0, 0, 0), position_ranges=((-1, 1), (-1, 1), (-1, 1))):
+#         self.position = position
+#         self.position_ranges = position_ranges[1]
+#         self.scaling = None
+
+#     def get_position(self):
+#         return None
+
+#     def get_scaling(self):
+#         return None
 
 
 class DataHandler:
@@ -102,7 +128,7 @@ class DataHandler:
                 else:
                     bpy.data.objects[name].location = mathutils.Vector(
                         location)
-                if location is not None:
+                if rotation is not None:
                     bpy.data.objects[name].rotation_euler = mathutils.Vector(
                         rotation)
                 if scale is not None:
@@ -234,9 +260,11 @@ class Background:
         self.data_handler.delete_images_planes()
 
 
+# TODO finish function so we delete all resources
 class Render:
-    def __init__(self, data_path, output_path, wanted_objects=None):
+    def __init__(self, data_path, output_path, camera, wanted_objects=None):
         self.scene = bpy.data.scenes['Scene']
+        self.scene.camera = camera.camera
         self.render_img_saving_path = output_path
         self.labels_filepath = os.path.join(output_path, "labels")
         self.data_handler = DataHandler(data_path, wanted_objects)
@@ -266,11 +294,13 @@ class Render:
         self.data_handler.delete_images_planes()
 
 
+# TODO/FIXME orientation of the added assets
 class RenderPreloadingAssets:
-    def __init__(self, data_path, output_path, wanted_objects=None):
+    def __init__(self, data_path, output_path, camera, wanted_objects=None):
         self.data_handler = DataHandler(data_path, wanted_objects)
         self.data_handler.add_all_images_unrendered()
         self.scene = bpy.data.scenes['Scene']
+        self.scene.camera = camera.camera
         self.render_img_saving_path = output_path
         self.labels_filepath = os.path.join(output_path, "labels")
 

@@ -4,6 +4,7 @@ import random
 import os
 import sys
 import numpy as np
+import math as m
 
 # TODO add option to choose exact number
 def get_list_random_images(imgs_list, n_max_objects=5, n_exact_number=None):
@@ -30,9 +31,42 @@ def get_directories_from_path(path):
 
 
 def get_random_xyz(x_range=(-2, 2), y_range=(0, 2), z_range=(0, 0)):
+    """Returns random XYZ in ranges given
+
+    Args:
+        x_range (tuple, optional): -+ range. Defaults to (-2, 2).
+        y_range (tuple, optional): -+ range. Defaults to (0, 2).
+        z_range (tuple, optional): -+ range. Defaults to (0, 0).
+
+    Returns:
+        XYZ tuple: XYZ random components
+    """
     x = random.uniform(x_range[0], x_range[1])
     y = random.uniform(y_range[0], y_range[1])
     z = random.uniform(z_range[0], z_range[1])
+    return x, y, z
+
+
+def get_random_xyz_rotation(x_range=(-1, 1), y_range=(-1, 1), z_range=(-1, 1), degrees=True):
+    """Returns random XYZ in ranges given
+
+    Args:
+        x_range (tuple, optional): -+ range. Defaults to (-2, 2).
+        y_range (tuple, optional): -+ range. Defaults to (0, 2).
+        z_range (tuple, optional): -+ range. Defaults to (0, 0).
+        degrees (bool, optional): if the given range is in degrees
+    
+    Returns:
+        XYZ tuple: XYZ random compoents in radians
+    """
+    if degrees:
+        x = random.uniform(m.radians(x_range[0]), m.radians(x_range[1]))
+        y = random.uniform(m.radians(y_range[0]), m.radians(y_range[1]))
+        z = random.uniform(m.radians(z_range[0]), m.radians(z_range[1]))
+    else:
+        x = random.uniform(x_range[0], x_range[1])
+        y = random.uniform(y_range[0], y_range[1])
+        z = random.uniform(z_range[0], z_range[1])
     return x, y, z
 
 
