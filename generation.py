@@ -7,35 +7,59 @@ from utils import *
 # TODO get position+- as per class parameter
 # TODO get scaling+- as per class parameter
 
+"""
+Parameters class will be associated with each type of object.
+So we will have to define optionally a parameters object for each object class
+"""
+class Parameters:
+    def __init__(self, location=None, location_range=((-1, 1), (-1, 1), (-1, 1)), random_location=False,
+                 rotation=None, rotation_range=((-1, 1), (-1, 1), (-1, 1)), random_rotation=False,
+                 scaling=None, scaling_range=(0.9, 1.1), random_scaling=False):
+        self.location = location
+        self.location_x_range = location_range[0]
+        self.location_y_range = location_range[1]
+        self.location_z_range = location_range[2]
 
-# class Position(NamedTuple):
-#     x: int
-#     y: int
-#     z: int
+        self.rotation = rotation
+        self.rotation_x_range = rotation_range[0]
+        self.rotation_y_range = rotation_range[1]
+        self.rotation_z_range = rotation_range[2]
 
+        self.scaling = scaling
+        self.scaling_range = scaling_range
 
-# class PositionRange(NamedTuple):
-#     x: tuple(int, int)
-#     y: tuple(int, int)
-#     z: tuple(int, int)
+        self.random_location = random_location
+        self.random_rotation = random_rotation
+        self.random_scaling = random_scaling
 
+    ####### Get functions #######
+    def get_location(self):
+        return self.location
 
-# class Parameters:
-#     def __init__(self, position=(0, 0, 0), position_ranges=((-1, 1), (-1, 1), (-1, 1))):
-#         self.position = position
-#         self.position_ranges = position_ranges[1]
-#         self.scaling = None
+    def get_scaling(self):
+        return (self.scaling, self.scaling, self.scaling)
 
-#     def get_position(self):
-#         return None
+    def get_rotation(self):
+        return self.location
 
-#     def get_scaling(self):
-#         return None
+    ####### Random related functions #######
+    def get_random_location(self):
+        return mathutils.Vector(
+            get_random_xyz(self.location_x_range, self.location_y_range, self.location_z_range))
+
+    def get_random_scaling(self):
+        random_scale = random.uniform(
+            self.scaling_range[0], self.scaling_range[1])
+        return (random_scale, random_scale, random_scale)
+
+    def get_random_rotation(self):
+        return mathutils.Vector(
+            get_random_xyz(self.rotation_x_range, self.rotation_y_range, self.rotation_z_range))
 
 
 class DataHandler:
-    def __init__(self, path_of_classes_folders=None, wanted_classes=None, classes_txt=True):
-
+    # TODO implement classes properties
+    def __init__(self, path_of_classes_folders=None, wanted_classes=None, classes_properties=None, classes_txt=True):
         self.classes = {}
         self.objects_paths = {}  # Dict keys:class_name = path
         self.objects = {}  # Dict keys:class_name = [objects_name]
@@ -44,6 +68,7 @@ class DataHandler:
         # bpy.data.objects
         self.active_objects = None
         # Intended for future features use
+        # TODO for each of the folders check what kind of objects they have
         self.type = None  # Dict keys:class_name = type(3D object/image)
 
         if path_of_classes_folders != None:
@@ -53,7 +78,6 @@ class DataHandler:
                 self.get_data_path_of_classes_folders(
                     wanted_classes, path_of_classes_folders)
             else:
-                print("TAKING ALL DIRECTORIES")
                 directories = get_directories_from_path(
                     path_of_classes_folders)
                 self.get_data_path_of_classes_folders(
