@@ -6,7 +6,6 @@ import time
 import os
 import sys
 import importlib
-import mathutils
 import addon_utils
 
 def add_path_for_modules():
@@ -16,16 +15,24 @@ def add_path_for_modules():
         sys.path.append(dir)
 
 
+def super_market_lights():
+    for x in range(0, 4, 2):
+        for y in np.arange(0, 5, 1.5):
+            light.Light(type='SPOT', location=(x, y, 2))
+
+
 add_path_for_modules()
 import utils
 import generation
 from utils import *
 from generation import Render, RenderPreloadingAssets
 import camera
+import light
 
 importlib.reload(utils)
 importlib.reload(generation)
 importlib.reload(camera)
+importlib.reload(light)
 
 addon_utils.enable("io_import_images_as_planes")
 
@@ -51,6 +58,12 @@ camera = camera.Camera(location=(0, 6, 0.3), location_range=((-0.5,0.5), (4, 6),
 render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/generated'
 
 floor = generation.Floor(random=True, size=30, location=(0, 0, 0))
+# floor.add_simple_floor()
+
+# light = light.Light(type='SPOT', location=(1,1,2), location_range=((-4, 4), (-4, 4), (1.2, 3)))
+# light.randomize_location()
+
+super_market_lights()
 
 # from timeit import Timer
 
@@ -102,3 +115,5 @@ camera.delete_camera()
 To get size of an image
 bpy.data.images['1.png'].size
 """
+
+

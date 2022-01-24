@@ -334,7 +334,7 @@ class RenderPreloadingAssets:
         self.hide_render_of_objects(False)
         # move them
         self.move_selected_objects()
-        # TODO handle camera
+
         # render
         export_render(self.scene, 500, 500, 100, 30,
                       self.render_img_saving_path, f'{idx}.png')
