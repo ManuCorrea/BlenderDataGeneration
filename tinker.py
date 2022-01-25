@@ -40,7 +40,7 @@ addon_utils.enable("io_import_images_as_planes")
 # https://blender.stackexchange.com/questions/121980/how-to-load-import-a-png-image-as-plane-via-blenders-python-api
 # bpy.ops.wm.addon_enable(module='io_import_images_as_planes')
 
-EPOCHS = 5
+EPOCHS = 50
 dataset_path = "/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/dataset/"
 cart_path = dataset_path + "cart"
 human_path = dataset_path + "human"
@@ -60,10 +60,15 @@ render_img_saving_path = '/home/yo/Desktop/Desarrollo/blender/Data-Generation-wi
 floor = generation.Floor(random=True, size=30, location=(0, 0, 0))
 # floor.add_simple_floor()
 
-# light = light.Light(type='SPOT', location=(1,1,2), location_range=((-4, 4), (-4, 4), (1.2, 3)))
-# light.randomize_location()
+light1 = light.Light(location=(1,1,2), location_range=((-2, 2), (0, 2), (1.2, 3)),
+                     energy_range=(60, 200))
 
-super_market_lights()
+light2 = light.Light(location=(1, 1, 2), location_range=(
+    (-3, 3), (0, 3), (1.2, 2)),
+    energy_range=(60,120))
+
+
+# super_market_lights()
 
 # from timeit import Timer
 
@@ -102,14 +107,25 @@ render = Render(dataset_path, render_img_saving_path, wanted_objects=wanted_obje
 # # print(t.timeit(number=20)) # 22.532155615001102
 # # print(t.timeit(number=5))
 for i in range(EPOCHS):
+    # floor and background
     floor.add_simple_floor()
     background.add_img_background()
+    # lights
+    light1.randomize_location()
+    light1.randomize_energy()
+    light2.randomize_location()
+    light2.randomize_energy()
+    # generate scene
     render.generate_scene(i)
+    # camera
     camera.randomize_location()
     camera.randomize_rotation()
+    # delete floor and background
     floor.delete_existing_floor()
     background.remove_img_background()
 camera.delete_camera()
+light1.delete_light()
+light2.delete_light()
 
 """
 To get size of an image

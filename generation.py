@@ -15,7 +15,7 @@ class Parameters:
     def __init__(self, location=None, location_range=((-1, 1), (-1, 1), (-1, 1)), random_location=False,
                  rotation=None, rotation_range=((-1, 1), (-1, 1), (-1, 1)), random_rotation=False,
                  scaling=None, scaling_range=(0.9, 1.1), random_scaling=False,
-                 object_to_floor=True):
+                 object_to_floor=True, n_objects=None, n_objects_fixed=False):
         self.location = location
         self.location_x_range = location_range[0]
         self.location_y_range = location_range[1]
@@ -173,9 +173,10 @@ class DataHandler:
                 repeated = True
             for name in names_list:
                 name = name.split('.')[0]
-                print(f"Selecting {name} in {bpy.data.objects.keys()}")
+                # print(f"Selecting {name} in {bpy.data.objects.keys()}")
                 if name in bpy.data.objects.keys():
                     bpy.data.objects[name].select_set(True)
+                # FIXME this approach does not work with DataHandler class
                 if repeated:
                     for key in bpy.data.objects.keys():
                         if key.startswith(name):
@@ -302,8 +303,14 @@ class Render:
         self.data_handler.sample()
         self.data_handler.add_images_planes()
 
-        export_render(self.scene, 500, 500, 100, 30,
+        print("\n\n\n\n\nEXPORTING Y TAL\n\n\n\n\n")
+        # export_render(self.scene, 500, 500, 100, 60,
+        #               self.render_img_saving_path, f'{idx}.png')
+
+        export_render(self.scene, 1920, 1080, 100, 60,
                       self.render_img_saving_path, f'{idx}.png')
+        # export_render(self.scene, 1280, 720, 100, 50,
+        #               self.render_img_saving_path, f'{idx}.png')
 
         # Here we add the bbox
         # Output Labels
