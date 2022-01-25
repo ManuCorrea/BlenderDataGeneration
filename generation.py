@@ -14,7 +14,8 @@ So we will have to define optionally a parameters object for each object class
 class Parameters:
     def __init__(self, location=None, location_range=((-1, 1), (-1, 1), (-1, 1)), random_location=False,
                  rotation=None, rotation_range=((-1, 1), (-1, 1), (-1, 1)), random_rotation=False,
-                 scaling=None, scaling_range=(0.9, 1.1), random_scaling=False):
+                 scaling=None, scaling_range=(0.9, 1.1), random_scaling=False,
+                 object_to_floor=True):
         self.location = location
         self.location_x_range = location_range[0]
         self.location_y_range = location_range[1]
@@ -142,13 +143,17 @@ class DataHandler:
             path = self.objects_paths[obj]
             for object_to_add in objects_list:
                 name = os.path.basename(object_to_add)
-                bpy.ops.import_image.to_plane(shader='SHADELESS',
+                bpy.ops.import_image.to_plane(shader='PRINCIPLED', #shader='SHADELESS',
                                               files=[{'name': name}],
                                               directory=path)
                 name = os.path.splitext(name)[0]
+
+                # make object by default stand on the floor
+                # on images Y dimension/2
+                z_pos = bpy.data.objects[name].dimensions[1]/2
                 if location is None:
                     bpy.data.objects[name].location = mathutils.Vector(
-                        get_random_xyz())
+                        get_random_xyz(z_range=(z_pos, z_pos)))
                 else:
                     bpy.data.objects[name].location = mathutils.Vector(
                         location)
