@@ -40,7 +40,7 @@ addon_utils.enable("io_import_images_as_planes")
 # https://blender.stackexchange.com/questions/121980/how-to-load-import-a-png-image-as-plane-via-blenders-python-api
 # bpy.ops.wm.addon_enable(module='io_import_images_as_planes')
 
-EPOCHS = 50
+EPOCHS = 2
 dataset_path = "/home/yo/Desktop/Desarrollo/blender/Data-Generation-with-Blender/Resources/dataset/"
 cart_path = dataset_path + "cart"
 human_path = dataset_path + "human"

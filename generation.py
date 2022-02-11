@@ -224,6 +224,23 @@ class DataHandler:
                     pass
         return main_text_coordinates
 
+    def assign_unique_pass_index(self):
+        # TODO find colour of the object index 
+        color = 0
+        idx = 0
+        for class_ in self.active_objects.keys():
+            names_list = self.active_objects[class_]
+            for name in names_list:
+                name = name.split('.')[0]
+                print("looking for ", name)
+                bpy.data.objects[name].pass_index = idx
+                # TODO safe data in file
+                print(f"assigning {idx} to {name}")
+                # self.objects = {}  # Dict keys:class_name = [objects_name]
+                print("\n\nencontrao")
+                print(f'{idx} {color}')
+                idx += 1
+
 
 class Floor:
     def __init__(self, size=50, location=(0, 0, 0), rgba=(0, 0, 0, 1), random=False):
@@ -302,13 +319,15 @@ class Render:
     def generate_scene(self, idx):
         self.data_handler.sample()
         self.data_handler.add_images_planes()
+        # TODO assign unique pass render as option
+        self.data_handler.assign_unique_pass_index()
 
         print("\n\n\n\n\nEXPORTING Y TAL\n\n\n\n\n")
-        # export_render(self.scene, 500, 500, 100, 60,
-        #               self.render_img_saving_path, f'{idx}.png')
-
-        export_render(self.scene, 1920, 1080, 100, 60,
+        export_render(self.scene, 500, 500, 100, 60,
                       self.render_img_saving_path, f'{idx}.png')
+
+        # export_render(self.scene, 1920, 1080, 100, 60,
+        #               self.render_img_saving_path, f'{idx}.png')
         # export_render(self.scene, 1280, 720, 100, 50,
         #               self.render_img_saving_path, f'{idx}.png')
 

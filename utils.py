@@ -310,6 +310,9 @@ def export_render(scene, res_x, res_y, res_per, samples, file_path, file_name):
     scene.render.resolution_percentage = res_per
     scene.render.filepath = file_path + '/' + file_name
 
+    # TODO handle options for masks
+    # scene.view_layers["View Layer"].use_pass_object_index = True
+
     # Take picture of current visible scene
     bpy.ops.render.render(write_still=True)
 
